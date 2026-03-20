@@ -79,6 +79,70 @@ export async function fetchJobScreeningQuestions(
   return (body as ApiSuccess<ScreeningQuestion[]>).data;
 }
 
+export type LatestJobsMeta = {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+};
+
+export async function fetchLatestJobsForAdmin(
+  page = 1,
+  limit = 5
+): Promise<{ items: JobSearchItem[]; meta: LatestJobsMeta }> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/jobs/latest?page=${encodeURIComponent(
+      String(page)
+    )}&limit=${encodeURIComponent(String(limit))}`,
+    {
+      headers: authHeaders(),
+      cache: "no-store",
+    }
+  );
+
+  const body = (await parseJsonSafe(res)) as
+    | (ApiSuccess<{ items: JobSearchItem[]; meta: LatestJobsMeta }>)
+    | ApiError
+    | null;
+
+  if (!res.ok || !body || body.success !== true) {
+    throw new Error(
+      (body as ApiError | null)?.message ||
+        `Failed to fetch latest jobs (${res.status})`
+    );
+  }
+
+  return (body as ApiSuccess<{ items: JobSearchItem[]; meta: LatestJobsMeta }>).data;
+}
+
+export async function fetchActiveJobsForAdmin(
+  limit = 200
+): Promise<JobSearchItem[]> {
+  const res = await fetch(
+    `${API_BASE_URL}/api/jobs/active?limit=${encodeURIComponent(
+      String(limit)
+    )}`,
+    {
+      headers: authHeaders(),
+      cache: "no-store",
+    }
+  );
+
+  const body = (await parseJsonSafe(res)) as
+    | ApiSuccess<JobSearchItem[]>
+    | ApiError
+    | null;
+
+  if (!res.ok || !body || body.success !== true) {
+    throw new Error(
+      (body as ApiError | null)?.message ||
+        `Failed to fetch active jobs (${res.status})`
+    );
+  }
+
+  return (body as ApiSuccess<JobSearchItem[]>).data;
+}
+
 export async function createJobWithQuestions(payload: {
   title: string;
   department?: string;

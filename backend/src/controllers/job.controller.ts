@@ -22,6 +22,7 @@ type JobSearchItem = {
   title: string;
   department: string | null;
   location: string | null;
+  description: string | null;
 };
 
 function parseLimit(raw: string | undefined, defaultValue: number, max = 20) {
@@ -150,7 +151,13 @@ export const searchJobs = async (
         },
       },
       take: limit,
-      select: { id: true, title: true, department: true, location: true },
+      select: {
+        id: true,
+        title: true,
+        department: true,
+        location: true,
+        description: true,
+      },
     });
 
     if (startsWithMatches.length >= limit) {
@@ -170,7 +177,13 @@ export const searchJobs = async (
         },
       },
       take: remaining,
-      select: { id: true, title: true, department: true, location: true },
+      select: {
+        id: true,
+        title: true,
+        department: true,
+        location: true,
+        description: true,
+      },
     });
 
     return res.status(200).json({
@@ -179,6 +192,99 @@ export const searchJobs = async (
     });
   } catch (error) {
     console.error("Job search error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+/**
+ * GET /api/jobs/latest?page=1&limit=5
+ * Recruiter-facing list of the latest active jobs for pagination.
+ */
+export const listLatestJobs = async (
+  req: Request<{}, {}, {}, { page?: string; limit?: string }>,
+  res: Response
+) => {
+  try {
+    const pageRaw = req.query.page;
+    const limitRaw = req.query.limit;
+
+    const page = Math.max(1, Number(pageRaw) || 1);
+    const limit = Math.min(20, Math.max(1, Number(limitRaw) || 5));
+    const skip = (page - 1) * limit;
+
+    const where = { isActive: true };
+
+    const [total, items] = await Promise.all([
+      prisma.job.count({ where }),
+      prisma.job.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          title: true,
+          department: true,
+          location: true,
+          description: true,
+        },
+      }),
+    ]);
+
+    const totalPages = Math.max(1, Math.ceil(total / limit));
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        items: items satisfies JobSearchItem[],
+        meta: { total, page, limit, totalPages },
+      },
+    });
+  } catch (error) {
+    console.error("List latest jobs error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+/**
+ * GET /api/jobs/active?limit=50
+ * Returns active jobs for combobox-like pickers.
+ */
+export const listActiveJobs = async (
+  req: Request<{}, {}, {}, { limit?: string }>,
+  res: Response
+) => {
+  try {
+    const limit = Math.min(
+      500,
+      Math.max(1, Number(req.query.limit) || 50)
+    );
+
+    const items = await prisma.job.findMany({
+      where: { isActive: true },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+      select: {
+        id: true,
+        title: true,
+        department: true,
+        location: true,
+        description: true,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: items satisfies JobSearchItem[],
+    });
+  } catch (error) {
+    console.error("List active jobs error:", error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",

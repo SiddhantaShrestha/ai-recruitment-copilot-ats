@@ -3,5 +3,6 @@ export type JobSearchItem = {
   title: string;
   department: string | null;
   location: string | null;
+  description?: string | null;
 };
 

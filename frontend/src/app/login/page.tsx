@@ -94,8 +94,8 @@ export default function LoginPage() {
             {submitting ? "Signing in…" : "Sign in"}
           </button>
         </form>
-        <p className="mt-5 text-center text-xs text-stone-500">
-          Test: test@example.com / password123
+        <p className="mt-5 font-bold text-center text-sm">
+          Project demo: login with `test@example.com` / `password123`
         </p>
       </div>
     </main>
