@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ApplicationStatus {
+  APPLIED
+  SCREENED
+  SHORTLISTED
+  INTERVIEW
+  OFFER
+  HIRED
+  REJECTED
+}
+
+enum ActivityType {
+  APPLIED
+  ANSWERS_SUBMITTED
+  AI_EVALUATED
+  STATUS_CHANGED
+  OPENCLAW_TRIGGERED
+  TELEGRAM_SENT
+  NOTE_ADDED
+  INTERVIEW_SCHEDULED
+  INTERVIEW_COMPLETED
+  INTERVIEW_CANCELLED
+}
+
+enum InterviewMode {
+  ONLINE
+  ONSITE
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+}
+
+enum ScreeningQuestionType {
+  TEXT
+  YES_NO
+  NUMBER
+}
+
+model Recruiter {
+  id           String   @id @default(cuid())
+  fullName     String
+  email        String   @unique
+  passwordHash String
+  role         String   @default("RECRUITER")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Candidate {
+  id            String        @id @default(cuid())
+  fullName      String
+  email         String        @unique
+  phone         String?
+  resumeUrl     String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  applications  Application[]
+  answers       ScreeningAnswer[]
+}
+
+model Job {
+  id                 String              @id @default(cuid())
+  title              String
+  department         String?
+  location           String?
+  description        String?
+  isActive           Boolean             @default(true)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+
+  applications       Application[]
+  screeningQuestions ScreeningQuestion[]
+}
+
+model Application {
+  id                String            @id @default(cuid())
+  candidateId       String
+  jobId             String
+  status            ApplicationStatus @default(APPLIED)
+  aiScore           Float?
+  aiSummary         String?
+  aiRecommendation  String?
+  appliedAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  candidate         Candidate         @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  job               Job               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  answers           ScreeningAnswer[]
+  activities        ApplicationActivity[]
+  notes             ApplicationNote[]
+  interviews        ApplicationInterview[]
+
+  @@unique([candidateId, jobId])
+}
+
+model ApplicationInterview {
+  id             String          @id @default(cuid())
+  applicationId  String
+  scheduledAt    DateTime
+  mode           InterviewMode
+  meetingLink    String?
+  location       String?
+  notes          String?
+  status         InterviewStatus @default(SCHEDULED)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  application    Application     @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
+}
+
+model ApplicationActivity {
+  id             String       @id @default(cuid())
+  applicationId  String
+  type           ActivityType
+  title          String
+  description    String
+  metadata       Json?
+  actorType      String?      // "SYSTEM" | "RECRUITER"
+  actorId        String?      // optional recruiter id
+  createdAt      DateTime     @default(now())
+
+  application    Application  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId, createdAt])
+}
+
+model ApplicationNote {
+  id             String       @id @default(cuid())
+  applicationId  String
+  recruiterId    String
+  content        String
+  createdAt      DateTime     @default(now())
+
+  application    Application  @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  @@index([applicationId])
+}
+
+model ScreeningQuestion {
+  id         String    @id @default(cuid())
+  jobId      String
+  question   String
+  order      Int
+  type       ScreeningQuestionType @default(TEXT)
+  createdAt  DateTime  @default(now())
+
+  job        Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  answers    ScreeningAnswer[]
+}
+
+model ScreeningAnswer {
+  id                  String            @id @default(cuid())
+  applicationId       String
+  candidateId         String
+  screeningQuestionId String
+  answer              String
+  createdAt           DateTime          @default(now())
+
+  application         Application       @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  candidate           Candidate         @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  screeningQuestion   ScreeningQuestion @relation(fields: [screeningQuestionId], references: [id], onDelete: Cascade)
+}

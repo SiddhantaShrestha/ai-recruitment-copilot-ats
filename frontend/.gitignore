@@ -1,0 +1,26 @@
+# Dependencies
+node_modules
+
+# Next.js build output
+.next
+out
+
+# Local env files
+.env
+.env.*
+!.env.example
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Logs
+*.log
+
+# Coverage
+coverage
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+

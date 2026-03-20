@@ -1,0 +1,31 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+build
+
+# Local env files
+.env
+.env.*
+!.env.example
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Prisma/local databases (if you generate them locally)
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+
+# Coverage
+coverage
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
