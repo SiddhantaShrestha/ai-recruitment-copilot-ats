@@ -6,7 +6,7 @@ This project demonstrates how AI can assist recruiters beyond simple automation 
 
 ---
 
-## 🚀 Overview
+##  Overview
 
 This is a full-stack recruitment system built for internal recruiter workflows. It combines a structured ATS pipeline with an AI-powered recruiter copilot that can:
 
@@ -22,7 +22,7 @@ The system is designed as a hybrid architecture:
 
 ---
 
-## ✨ Core Features
+##  Core Features
 
 ### ATS System
 - Recruiter authentication
@@ -56,7 +56,7 @@ The system is designed as a hybrid architecture:
 
 ---
 
-## 🧠 Example Copilot Queries
+##  Example Copilot Queries
 
 - `what should I prioritize today?`
 - `which candidates need follow-up?`
@@ -67,7 +67,7 @@ The system is designed as a hybrid architecture:
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 ### 1. Core ATS System
 - Jobs
@@ -93,7 +93,7 @@ The system is designed as a hybrid architecture:
 
 ---
 
-## 🧩 Tech Stack
+##  Tech Stack
 
 ### Frontend
 - Next.js
@@ -120,7 +120,7 @@ The system is designed as a hybrid architecture:
 
 ---
 
-## 🔄 Key Workflows
+##  Key Workflows
 
 ### Job + Screening Setup
 1. Recruiter creates a job
@@ -149,7 +149,7 @@ The system is designed as a hybrid architecture:
 
 ---
 
-## ⚙️ Setup Instructions
+##  Setup Instructions
 
 ### 1. Clone repo
 ```bash
